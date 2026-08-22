@@ -14,12 +14,14 @@ interface FetchNotesResponse {
 }
 export const checkSession = async () => {
   const cookieStore = await cookies();
+
   const res = await api.get("/auth/session", {
     headers: {
       Cookie: cookieStore.toString(),
     },
   });
-  return res.data;
+
+  return res;
 };
 
 export const fetchNotes = async (
