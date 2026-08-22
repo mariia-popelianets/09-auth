@@ -24,7 +24,7 @@ export async function proxy(request: NextRequest) {
 
   if (accessToken) {
     if (isPublicRoute) {
-      return NextResponse.redirect(new URL("/profile", request.url));
+      return NextResponse.redirect(new URL("/", request.url));
     }
 
     return NextResponse.next();
@@ -43,17 +43,19 @@ export async function proxy(request: NextRequest) {
           const parsed = parseSetCookie(cookieStr);
 
           if (parsed.name && parsed.value) {
-            cookieStore.set(parsed.name, parsed.value, parsed);
+            const { name, value, ...options } = parsed;
+
+            cookieStore.set(name, value, options);
           }
         }
 
-        const response = isPublicRoute
-          ? NextResponse.redirect(new URL("/profile", request.url))
+        const nextResponse = isPublicRoute
+          ? NextResponse.redirect(new URL("/", request.url))
           : NextResponse.next();
 
-        response.headers.set("Cookie", cookieStore.toString());
+        nextResponse.headers.set("Cookie", cookieStore.toString());
 
-        return response;
+        return nextResponse;
       }
     } catch {}
   }
