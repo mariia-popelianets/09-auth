@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { parseSetCookie } from "cookie";
 import { checkSession } from "./lib/api/serverApi";
 
-const privateRoutes = ["/profile"];
+const privateRoutes = ["/profile", "/notes"];
 const publicRoutes = ["/sign-in", "/sign-up"];
 
 export async function proxy(request: NextRequest) {
@@ -47,13 +47,13 @@ export async function proxy(request: NextRequest) {
           }
         }
 
-        if (isPublicRoute) {
-          return NextResponse.redirect(new URL("/profile", request.url));
-        }
+        const response = isPublicRoute
+          ? NextResponse.redirect(new URL("/profile", request.url))
+          : NextResponse.next();
 
-        if (isPrivateRoute) {
-          return NextResponse.next();
-        }
+        response.headers.set("Cookie", cookieStore.toString());
+
+        return response;
       }
     } catch {}
   }
@@ -66,5 +66,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/profile/:path*", "/sign-in", "/sign-up"],
+  matcher: ["/profile/:path*", "/notes/:path*", "/sign-in", "/sign-up"],
 };
